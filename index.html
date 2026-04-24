@@ -1,0 +1,918 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, minimum-scale=1.0, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Tournoi Belote">
+<meta name="theme-color" content="#2e6b28">
+<title>Tournoi Belote Contrée</title>
+<style>
+:root {
+  --green:#3d8b3d;--green-dark:#1a4a1a;--green-felt:#2e6b28;
+  --red:#cc1f1f;--gold:#c8960a;--gold-light:#fdf3d0;
+  --blue:#1a5295;--panel:#1a3318;--card:#f0ede6;
+  --border:rgba(255,255,255,0.12);--border-light:#ccc8be;
+  --text:#1a1a1a;--text-light:#f0ede6;--text2:#5a5650;
+  --radius:18px;--radius-sm:12px;
+}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;}
+html,body{height:100%;background:var(--green-felt);font-family:-apple-system,'SF Pro Rounded','Helvetica Neue',sans-serif;color:var(--text);overscroll-behavior:none;overflow-x:hidden;}
+body{background:#2e6b28;background-image:repeating-linear-gradient(45deg,rgba(0,0,0,0.03) 0px,rgba(0,0,0,0.03) 1px,transparent 1px,transparent 8px),repeating-linear-gradient(-45deg,rgba(0,0,0,0.03) 0px,rgba(0,0,0,0.03) 1px,transparent 1px,transparent 8px);}
+
+#app{max-width:540px;margin:0 auto;min-height:100dvh;display:flex;flex-direction:column;padding-top:env(safe-area-inset-top,0px);}
+
+/* ═══ HEADER ═══ */
+.header{background:rgba(0,0,0,0.35);backdrop-filter:blur(10px);padding:14px 16px 10px;border-bottom:1px solid rgba(255,255,255,0.1);position:sticky;top:0;z-index:100;}
+.header h1{font-size:19px;font-weight:800;color:var(--text-light);text-align:center;letter-spacing:-0.3px;}
+.header .sub{font-size:12px;color:rgba(255,255,255,0.45);text-align:center;margin-top:2px;}
+
+/* ═══ SCREENS ═══ */
+.screen{display:none;flex:1;flex-direction:column;}
+.screen.active{display:flex;}
+
+/* ═══ BOTTOM NAV ═══ */
+.bottom-nav{position:fixed;bottom:0;left:50%;transform:translateX(-50%);width:100%;max-width:540px;background:var(--panel);border-top:1px solid rgba(255,255,255,0.1);display:flex;padding-bottom:env(safe-area-inset-bottom,0px);z-index:999;}
+.nav-item{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:8px 4px 6px;border:none;background:none;color:rgba(255,255,255,0.4);font-size:9px;font-weight:700;font-family:inherit;letter-spacing:.04em;cursor:pointer;text-transform:uppercase;gap:3px;transition:color .15s;}
+.nav-item.active{color:var(--gold);}
+.ni-icon{font-size:20px;line-height:1;}
+
+/* ═══ SCROLL BODY ═══ */
+.scroll-body{flex:1;overflow-y:auto;padding:12px 14px 90px;}
+.scroll-body::-webkit-scrollbar{width:3px;}
+.scroll-body::-webkit-scrollbar-thumb{background:rgba(255,255,255,0.2);border-radius:2px;}
+
+/* ═══ CARDS ═══ */
+.card{background:var(--card);border-radius:var(--radius);padding:16px;margin-bottom:12px;}
+.card-dark{background:rgba(255,255,255,0.08);border:1px solid var(--border);border-radius:var(--radius);padding:16px;margin-bottom:12px;}
+.card-title{font-size:11px;font-weight:800;color:var(--text2);text-transform:uppercase;letter-spacing:.08em;margin-bottom:12px;}
+.card-title-light{font-size:11px;font-weight:800;color:rgba(255,255,255,0.45);text-transform:uppercase;letter-spacing:.08em;margin-bottom:12px;}
+
+/* ═══ BUTTONS ═══ */
+.btn{border:none;border-radius:var(--radius-sm);padding:12px 18px;font-size:14px;font-weight:700;cursor:pointer;font-family:inherit;transition:opacity .15s;display:inline-flex;align-items:center;justify-content:center;gap:6px;}
+.btn:active{opacity:.75;}
+.btn-green{background:var(--green);color:#fff;}
+.btn-gold{background:var(--gold);color:#fff;}
+.btn-red{background:var(--red);color:#fff;}
+.btn-outline{background:rgba(255,255,255,0.1);color:rgba(255,255,255,0.8);border:1px solid rgba(255,255,255,0.25);}
+.btn-outline-dark{background:rgba(0,0,0,0.07);color:var(--text2);border:1px solid var(--border-light);}
+.btn-full{width:100%;}
+.btn-sm{padding:8px 14px;font-size:13px;}
+
+/* ═══ INPUTS ═══ */
+.inp{width:100%;background:#fff;border:1.5px solid var(--border-light);border-radius:var(--radius-sm);padding:11px 14px;font-size:15px;font-family:inherit;color:var(--text);outline:none;transition:border-color .2s;}
+.inp:focus{border-color:var(--green);}
+.inp-dark{background:rgba(255,255,255,0.12);border:1px solid rgba(255,255,255,0.2);color:#fff;}
+.inp-dark::placeholder{color:rgba(255,255,255,0.35);}
+.inp-dark:focus{border-color:var(--gold);}
+.inp-row{display:flex;gap:8px;align-items:center;}
+.label{font-size:12px;font-weight:700;color:var(--text2);margin-bottom:5px;}
+.label-light{font-size:12px;font-weight:700;color:rgba(255,255,255,0.5);margin-bottom:5px;}
+
+/* ═══ CHIPS ═══ */
+.chip{display:inline-flex;align-items:center;gap:6px;background:rgba(61,139,61,0.2);border:1px solid rgba(61,139,61,0.4);border-radius:99px;padding:5px 12px;font-size:13px;font-weight:600;color:var(--text-light);}
+.chip-del{cursor:pointer;opacity:.5;font-size:11px;font-weight:900;}
+.chips-wrap{display:flex;flex-wrap:wrap;gap:6px;min-height:28px;}
+
+/* ═══ BADGE ═══ */
+.badge{display:inline-flex;align-items:center;padding:3px 10px;border-radius:99px;font-size:11px;font-weight:800;letter-spacing:.04em;}
+.badge-green{background:#1a5c1a;color:#7ddd82;}
+.badge-red{background:#5c1a1a;color:#ff8080;}
+.badge-gold{background:rgba(200,150,10,0.25);color:var(--gold);}
+.badge-blue{background:rgba(26,82,149,0.25);color:#7ab3f0;}
+
+/* ═══ TABLE ═══ */
+.t{width:100%;border-collapse:collapse;font-size:13px;}
+.t th{padding:7px 8px;font-size:10px;font-weight:800;color:var(--text2);text-transform:uppercase;letter-spacing:.06em;border-bottom:1.5px solid var(--border-light);text-align:left;}
+.t td{padding:9px 8px;border-bottom:1px solid rgba(0,0,0,0.06);vertical-align:middle;}
+.t tr:last-child td{border-bottom:none;}
+.t .num{font-weight:900;color:var(--text2);}
+.t .bold{font-weight:800;}
+.t .pct{font-size:15px;font-weight:900;}
+
+/* ═══ SCORE ROW ═══ */
+.score-row{display:flex;align-items:center;gap:8px;margin-bottom:10px;}
+.score-row .team-name{flex:1;font-size:14px;font-weight:700;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+.score-input{width:72px;background:#fff;border:1.5px solid var(--border-light);border-radius:10px;padding:9px;font-size:18px;font-weight:900;text-align:center;font-family:inherit;color:var(--text);outline:none;}
+.score-input:focus{border-color:var(--green);}
+
+/* ═══ APPARIEMENT TABLE ═══ */
+.table-card{background:rgba(255,255,255,0.08);border:1px solid rgba(255,255,255,0.15);border-radius:14px;padding:14px;margin-bottom:10px;}
+.table-card.done{border-color:rgba(61,139,61,0.5);background:rgba(61,139,61,0.1);}
+.table-num{font-size:11px;font-weight:800;color:rgba(255,255,255,0.4);text-transform:uppercase;letter-spacing:.08em;margin-bottom:6px;}
+.table-vs{display:flex;align-items:center;gap:8px;}
+.table-team{flex:1;font-size:15px;font-weight:800;color:#fff;}
+.table-team.exempt{color:rgba(255,255,255,0.45);font-style:italic;}
+.table-sep{font-size:12px;color:rgba(255,255,255,0.3);font-weight:700;}
+.table-score{font-size:13px;font-weight:700;margin-top:6px;color:rgba(255,255,255,0.6);}
+
+/* ═══ CLASSEMENT ROW ═══ */
+.rank-row{display:flex;align-items:center;gap:10px;padding:10px 0;border-bottom:1px solid rgba(0,0,0,0.06);}
+.rank-row:last-child{border-bottom:none;}
+.rank-num{font-size:22px;font-weight:900;color:var(--text2);width:28px;text-align:center;}
+.rank-num.gold{color:var(--gold);}
+.rank-num.silver{color:#9e9e9e;}
+.rank-num.bronze{color:#a0522d;}
+.rank-info{flex:1;}
+.rank-name{font-size:15px;font-weight:800;color:var(--text);}
+.rank-players{font-size:12px;color:var(--text2);margin-top:1px;}
+.rank-pct{font-size:22px;font-weight:900;color:var(--green);}
+.rank-detail{font-size:11px;color:var(--text2);margin-top:1px;text-align:right;}
+
+/* ═══ MODAL ═══ */
+.modal-bg{position:fixed;inset:0;background:rgba(0,0,0,0.75);z-index:10000;display:flex;align-items:center;justify-content:center;padding:20px;}
+.modal-box{background:var(--card);border-radius:var(--radius);padding:22px;width:100%;max-width:440px;max-height:85dvh;overflow-y:auto;}
+.modal-title{font-size:17px;font-weight:800;color:var(--text);margin-bottom:16px;}
+
+/* ═══ SPLASH ═══ */
+#splash{position:fixed;inset:0;background:#1a3318;z-index:99999;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px;transition:opacity .5s;}
+#splash.hide{opacity:0;pointer-events:none;}
+#splash .sp-icon{font-size:64px;}
+#splash .sp-title{font-size:24px;font-weight:900;color:var(--gold);}
+#splash .sp-sub{font-size:14px;color:rgba(255,255,255,0.45);}
+
+/* ═══ EMPTY STATE ═══ */
+.empty{text-align:center;padding:40px 20px;color:rgba(255,255,255,0.35);font-size:14px;line-height:1.8;}
+.empty-icon{font-size:48px;margin-bottom:8px;}
+
+/* ═══ DIVIDER ═══ */
+.divider{height:1px;background:rgba(0,0,0,0.1);margin:12px 0;}
+.divider-light{height:1px;background:rgba(255,255,255,0.1);margin:12px 0;}
+
+/* ═══ SECTION TITRE ═══ */
+.section-hdr{display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;}
+.section-title{font-size:14px;font-weight:800;color:var(--text-light);}
+.section-sub{font-size:12px;color:rgba(255,255,255,0.4);}
+
+/* ═══ STATS BOXES ═══ */
+.stat-row{display:flex;gap:8px;margin-bottom:12px;}
+.stat-box{flex:1;background:rgba(255,255,255,0.08);border-radius:12px;padding:10px;text-align:center;}
+.stat-val{font-size:22px;font-weight:900;color:#fff;}
+.stat-lbl{font-size:10px;font-weight:700;color:rgba(255,255,255,0.45);text-transform:uppercase;margin-top:2px;}
+
+/* ═══ TOAST ═══ */
+#toast{position:fixed;bottom:90px;left:50%;transform:translateX(-50%);background:rgba(0,0,0,0.8);color:#fff;padding:10px 20px;border-radius:99px;font-size:13px;font-weight:600;z-index:99998;transition:opacity .4s;white-space:nowrap;opacity:0;pointer-events:none;}
+
+/* iPad paysage */
+@media (min-width:900px) and (orientation:landscape){
+  #app{max-width:100%;}
+  .bottom-nav{max-width:none;transform:none;left:0;}
+  .header{padding-top:max(10px,env(safe-area-inset-top,10px)) !important;}
+}
+/* iPad portrait */
+@media (min-width:700px) and (orientation:portrait){
+  #app{max-width:680px;}
+  .header{padding-top:max(10px,env(safe-area-inset-top,10px)) !important;}
+}
+</style>
+</head>
+<body>
+<div id="splash">
+  <div class="sp-icon">🏆</div>
+  <div class="sp-title">Tournoi Belote</div>
+  <div class="sp-sub">Contrée · Cannes</div>
+</div>
+
+<div id="app">
+
+  <!-- HEADER -->
+  <div class="header">
+    <h1 id="hdr-title">Tournoi Belote Contrée</h1>
+    <div class="sub" id="hdr-sub">Organisateur</div>
+  </div>
+
+  <!-- ══ ÉCRAN ACCUEIL ══ -->
+  <div class="screen active" id="screen-home">
+    <div class="scroll-body">
+      <div class="card-dark" style="text-align:center;padding:28px 20px;">
+        <div style="font-size:52px;margin-bottom:10px;">🏆</div>
+        <div style="font-size:20px;font-weight:900;color:#fff;margin-bottom:6px;">Tournoi Belote Contrée</div>
+        <div style="font-size:13px;color:rgba(255,255,255,0.5);margin-bottom:22px;">Gérez vos tournois selon le règlement de Cannes</div>
+        <button class="btn btn-gold btn-full" style="font-size:16px;padding:15px;margin-bottom:10px;" onclick="showScreen('setup')">➕ Nouveau tournoi</button>
+        <button class="btn btn-outline btn-full" id="btn-reprendre" style="display:none;" onclick="loadAndContinue()">▶️ Reprendre le tournoi en cours</button>
+      </div>
+
+      <div id="home-historique"></div>
+    </div>
+  </div>
+
+  <!-- ══ ÉCRAN CRÉATION ══ -->
+  <div class="screen" id="screen-setup">
+    <div class="scroll-body">
+      <!-- Infos tournoi -->
+      <div class="card">
+        <div class="card-title">Informations du tournoi</div>
+        <div class="label">Nom du tournoi</div>
+        <input class="inp" id="inp-nom" type="text" placeholder="Ex: Tournoi de printemps 2025" maxlength="40" style="margin-bottom:12px;">
+        <div style="display:flex;gap:10px;">
+          <div style="flex:1;">
+            <div class="label">Date</div>
+            <input class="inp" id="inp-date" type="date">
+          </div>
+          <div style="flex:1;">
+            <div class="label">Nombre de tours</div>
+            <select class="inp" id="inp-tours">
+              <option value="3">3 tours</option>
+              <option value="4">4 tours</option>
+              <option value="5" selected>5 tours</option>
+              <option value="6">6 tours</option>
+              <option value="7">7 tours</option>
+            </select>
+          </div>
+        </div>
+      </div>
+
+      <!-- Équipes -->
+      <div class="card">
+        <div class="card-title">Équipes participantes</div>
+        <div class="label">Ajouter une équipe</div>
+        <div style="display:flex;gap:8px;margin-bottom:8px;">
+          <input class="inp" id="inp-j1" type="text" placeholder="Joueur 1" maxlength="16" style="flex:1;" onkeydown="if(event.key==='Tab'||event.key==='Enter'){event.preventDefault();eid('inp-j2').focus();}">
+          <input class="inp" id="inp-j2" type="text" placeholder="Joueur 2" maxlength="16" style="flex:1;" onkeydown="if(event.key==='Enter')addEquipe();">
+        </div>
+        <button class="btn btn-green btn-full btn-sm" onclick="addEquipe()" style="margin-bottom:14px;">➕ Ajouter l'équipe</button>
+        <div class="chips-wrap" id="equipes-chips">
+          <span style="font-size:12px;color:var(--text2);">Aucune équipe ajoutée</span>
+        </div>
+        <div id="equipes-count" style="margin-top:10px;font-size:12px;color:var(--text2);"></div>
+      </div>
+
+      <!-- Tables -->
+      <div class="card">
+        <div class="card-title">Configuration</div>
+        <div class="label">Nombre de tables simultanées</div>
+        <select class="inp" id="inp-ntables" style="margin-bottom:0;">
+          <option value="auto">Automatique (équipes÷2)</option>
+          <option value="2">2 tables</option>
+          <option value="3">3 tables</option>
+          <option value="4">4 tables</option>
+          <option value="5">5 tables</option>
+          <option value="6">6 tables</option>
+          <option value="8">8 tables</option>
+        </select>
+      </div>
+
+      <button class="btn btn-gold btn-full" style="font-size:16px;padding:15px;margin-bottom:8px;" onclick="startTournoi()">🏆 Démarrer le tournoi</button>
+      <button class="btn btn-outline btn-full" onclick="showScreen('home')">Annuler</button>
+    </div>
+  </div>
+
+  <!-- ══ ÉCRAN TOURNOI (onglets) ══ -->
+  <div class="screen" id="screen-tournoi">
+    <div class="scroll-body" id="tab-content"></div>
+    <nav class="bottom-nav">
+      <button class="nav-item active" id="nav-tables" onclick="showTab('tables')"><span class="ni-icon">🎯</span>Tables</button>
+      <button class="nav-item" id="nav-classement" onclick="showTab('classement')"><span class="ni-icon">🏆</span>Classement</button>
+      <button class="nav-item" id="nav-resultats" onclick="showTab('resultats')"><span class="ni-icon">📋</span>Résultats</button>
+      <button class="nav-item" id="nav-config" onclick="showTab('config')"><span class="ni-icon">⚙️</span>Tournoi</button>
+    </nav>
+  </div>
+
+  <!-- TOAST -->
+  <div id="toast"></div>
+
+  <!-- MODAL -->
+  <div id="modal-bg" class="modal-bg" style="display:none;" onclick="if(event.target===this)closeModal()">
+    <div class="modal-box" id="modal-box" onclick="event.stopPropagation()"></div>
+  </div>
+
+</div>
+
+<script>
+// ═══════════════════════════════════════════════════════════
+// UTILITAIRES
+// ═══════════════════════════════════════════════════════════
+function eid(id){return document.getElementById(id);}
+function v(id){return eid(id)?eid(id).value:'';}
+
+function toast(msg,dur=2200){
+  const t=eid('toast');t.textContent=msg;t.style.opacity='1';
+  setTimeout(()=>{t.style.opacity='0';},dur);
+}
+
+function showModal(html){
+  eid('modal-box').innerHTML=html;
+  eid('modal-bg').style.display='flex';
+}
+function closeModal(){eid('modal-bg').style.display='none';}
+
+function showScreen(name){
+  document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
+  const s=eid('screen-'+name);
+  if(s)s.classList.add('active');
+  updateHeader();
+}
+
+function updateHeader(){
+  const T=getSavedTournoi();
+  if(T&&T.nom){
+    eid('hdr-title').textContent=T.nom;
+    eid('hdr-sub').textContent=`Tour ${T.tourEnCours} / ${T.nbTours} · ${T.equipes.length} équipes`;
+  } else {
+    eid('hdr-title').textContent='Tournoi Belote Contrée';
+    eid('hdr-sub').textContent='Organisateur';
+  }
+}
+
+// ═══════════════════════════════════════════════════════════
+// ÉTAT
+// ═══════════════════════════════════════════════════════════
+let T = null; // tournoi en cours
+
+function getSavedTournoi(){
+  try{const d=localStorage.getItem('bct_tournoi');return d?JSON.parse(d):null;}catch(e){return null;}
+}
+function saveTournoi(){
+  try{localStorage.setItem('bct_tournoi',JSON.stringify(T));}catch(e){}
+}
+function saveHistorique(t){
+  try{
+    let h=JSON.parse(localStorage.getItem('bct_tournoi_hist')||'[]');
+    h.unshift(t);h=h.slice(0,10);
+    localStorage.setItem('bct_tournoi_hist',JSON.stringify(h));
+  }catch(e){}
+}
+
+// ═══════════════════════════════════════════════════════════
+// SETUP ÉCRAN
+// ═══════════════════════════════════════════════════════════
+let equipesTmp=[];
+
+function addEquipe(){
+  const j1=v('inp-j1').trim(),j2=v('inp-j2').trim();
+  if(!j1||!j2){toast('⚠️ Saisissez les deux joueurs');return;}
+  const nom=j1+' & '+j2;
+  if(equipesTmp.find(e=>e.nom===nom)){toast('⚠️ Équipe déjà ajoutée');return;}
+  equipesTmp.push({id:Date.now(),nom,j1,j2});
+  eid('inp-j1').value='';eid('inp-j2').value='';
+  eid('inp-j1').focus();
+  renderEquipesChips();
+}
+
+function removeEquipe(id){
+  equipesTmp=equipesTmp.filter(e=>e.id!==id);
+  renderEquipesChips();
+}
+
+function renderEquipesChips(){
+  const wrap=eid('equipes-chips');
+  if(!equipesTmp.length){
+    wrap.innerHTML='<span style="font-size:12px;color:var(--text2);">Aucune équipe ajoutée</span>';
+    eid('equipes-count').textContent='';return;
+  }
+  wrap.innerHTML=equipesTmp.map(e=>`
+    <div class="chip">${e.nom}<span class="chip-del" onclick="removeEquipe(${e.id})">✕</span></div>
+  `).join('');
+  const n=equipesTmp.length;
+  const ok=n>=4&&n%2===0;
+  eid('equipes-count').innerHTML=`<span style="color:${ok?'var(--green)':'var(--red)'};">${n} équipe${n>1?'s':''} — ${n} joueurs</span>${!ok&&n>0?'<span style="color:var(--red);"> (nombre pair requis, min 4)</span>':''}`;
+}
+
+function startTournoi(){
+  const nom=v('inp-nom').trim();
+  if(!nom){toast('⚠️ Donnez un nom au tournoi');return;}
+  if(equipesTmp.length<4){toast('⚠️ Minimum 4 équipes requises');return;}
+  if(equipesTmp.length%2!==0){toast('⚠️ Nombre d\'équipes doit être pair');return;}
+  const nbTours=parseInt(v('inp-tours'));
+  const ntablesVal=v('inp-ntables');
+  const nbTables=ntablesVal==='auto'?equipesTmp.length/2:parseInt(ntablesVal);
+  const dateVal=v('inp-date')||new Date().toISOString().split('T')[0];
+
+  // Initialiser le tournoi
+  T={
+    nom,date:dateVal,nbTours,nbTables,
+    tourEnCours:1,
+    equipes:equipesTmp.map((e,i)=>({
+      ...e,
+      pct:0,nbVictoires:0,nbDefaites:0,
+      tours:[],// {adversaire, score_nous, score_eux, pct_nous, pct_eux, exempt}
+    })),
+    appariements:[],// [{tour, tables:[{equipe1id, equipe2id, score1, score2, saisi}]}]
+    statut:'en_cours'
+  };
+
+  // Générer appariement tour 1
+  genererAppariement();
+  saveTournoi();
+
+  // Reset form
+  equipesTmp=[];eid('inp-j1').value='';eid('inp-j2').value='';eid('inp-nom').value='';
+  renderEquipesChips();
+
+  showScreen('tournoi');updateHeader();
+  showTab('tables');
+  toast('🏆 Tournoi démarré !');
+}
+
+function loadAndContinue(){
+  T=getSavedTournoi();
+  showScreen('tournoi');updateHeader();showTab('tables');
+}
+
+// ═══════════════════════════════════════════════════════════
+// APPARIEMENT
+// ═══════════════════════════════════════════════════════════
+function genererAppariement(){
+  const tour=T.tourEnCours;
+  const eq=[...T.equipes];
+  let paires=[];
+  const dejaCombinees=new Set();// pour ne pas rematchers les mêmes équipes
+
+  // Historique des rencontres
+  const rencontres={};
+  T.appariements.forEach(a=>{
+    a.tables.forEach(ta=>{
+      if(!ta.equipe2id)return;// exemptée
+      const k=[ta.equipe1id,ta.equipe2id].sort().join('_');
+      rencontres[k]=(rencontres[k]||0)+1;
+    });
+  });
+
+  // Qui a été exempté
+  const exemptions={};
+  T.appariements.forEach(a=>{
+    a.tables.forEach(ta=>{
+      if(!ta.equipe2id)exemptions[ta.equipe1id]=(exemptions[ta.equipe1id]||0)+1;
+    });
+  });
+
+  // Trier par % décroissant (sauf tour 1 : aléatoire)
+  if(tour===1){
+    // Mélange aléatoire
+    for(let i=eq.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[eq[i],eq[j]]=[eq[j],eq[i]];}
+  } else {
+    eq.sort((a,b)=>b.pct-a.pct);
+  }
+
+  // Gérer exemption si nombre impair
+  let exempt=null;
+  if(eq.length%2!==0){
+    // Choisir l'équipe exemptée : celle qui l'a été le moins, parmi les dernières du classement
+    let minExempt=Infinity,candidat=null;
+    for(let i=eq.length-1;i>=0;i--){
+      const n=exemptions[eq[i].id]||0;
+      if(n<minExempt){minExempt=n;candidat=i;}
+    }
+    exempt=eq.splice(candidat,1)[0];
+  }
+
+  // Apparier
+  const used=new Set();
+  for(let i=0;i<eq.length;i++){
+    if(used.has(eq[i].id))continue;
+    for(let j=i+1;j<eq.length;j++){
+      if(used.has(eq[j].id))continue;
+      const k=[eq[i].id,eq[j].id].sort().join('_');
+      if(!rencontres[k]){
+        paires.push({e1:eq[i],e2:eq[j]});
+        used.add(eq[i].id);used.add(eq[j].id);
+        break;
+      }
+    }
+    // Si pas trouvé d'adversaire inédit, prendre le prochain disponible
+    if(!used.has(eq[i].id)){
+      for(let j=i+1;j<eq.length;j++){
+        if(!used.has(eq[j].id)){
+          paires.push({e1:eq[i],e2:eq[j]});
+          used.add(eq[i].id);used.add(eq[j].id);
+          break;
+        }
+      }
+    }
+  }
+
+  const tables=paires.map((p,i)=>({
+    table:i+1,
+    equipe1id:p.e1.id,equipe2id:p.e2.id,
+    score1:null,score2:null,saisi:false
+  }));
+  if(exempt)tables.push({table:tables.length+1,equipe1id:exempt.id,equipe2id:null,score1:null,score2:null,saisi:false,exempt:true});
+
+  T.appariements.push({tour,tables});
+}
+
+function getAppariementCourant(){
+  return T.appariements.find(a=>a.tour===T.tourEnCours)||null;
+}
+
+function getEquipe(id){
+  return T.equipes.find(e=>e.id===id)||null;
+}
+
+// ═══════════════════════════════════════════════════════════
+// CALCUL POURCENTAGES (règlement Cannes)
+// ═══════════════════════════════════════════════════════════
+function calculerPourcentage(scoreA,scoreB){
+  if(scoreA===scoreB)return[50,50];
+  const total=scoreA+scoreB;
+  if(total===0)return[50,50];
+  const ecart=Math.abs(scoreA-scoreB);
+  const gagnant=scoreA>scoreB?'A':'B';
+  // Barème du règlement
+  let pctGagnant;
+  if(ecart<=2)pctGagnant=70;
+  else if(ecart<=100)pctGagnant=70+Math.floor((ecart-2)/100*5);
+  else if(ecart<=200)pctGagnant=75;
+  else if(ecart<=400)pctGagnant=80;
+  else if(ecart<=600)pctGagnant=85;
+  else if(ecart<=800)pctGagnant=90;
+  else if(ecart<=1000)pctGagnant=95;
+  else if(ecart<=1950)pctGagnant=99;
+  else pctGagnant=100;
+  const pctPerdant=100-pctGagnant;
+  return gagnant==='A'?[pctGagnant,pctPerdant]:[pctPerdant,pctGagnant];
+}
+
+function saisirScore(tableIdx){
+  const app=getAppariementCourant();
+  if(!app)return;
+  const ta=app.tables[tableIdx];
+  const e1=getEquipe(ta.equipe1id);
+  const e2=getEquipe(ta.equipe2id);
+
+  showModal(`
+    <div class="modal-title">Saisir le score — Table ${ta.table}</div>
+    <div style="margin-bottom:16px;">
+      <div class="score-row">
+        <div class="team-name">${e1.nom}</div>
+        <input class="score-input" id="sc1" type="number" min="0" max="9999" placeholder="0">
+      </div>
+      <div class="score-row">
+        <div class="team-name">${e2.nom}</div>
+        <input class="score-input" id="sc2" type="number" min="0" max="9999" placeholder="0">
+      </div>
+    </div>
+    <div style="font-size:11px;color:var(--text2);margin-bottom:14px;">Les pourcentages seront calculés automatiquement selon le règlement de Cannes.</div>
+    <div style="display:flex;gap:10px;">
+      <button class="btn btn-green btn-full" onclick="validerScore(${tableIdx})">✅ Valider</button>
+      <button class="btn btn-outline-dark btn-full" onclick="closeModal()">Annuler</button>
+    </div>
+  `);
+  setTimeout(()=>{const el=eid('sc1');if(el)el.focus();},100);
+}
+
+function validerScore(tableIdx){
+  const s1=parseInt(v('sc1'));
+  const s2=parseInt(v('sc2'));
+  if(isNaN(s1)||isNaN(s2)||s1<0||s2<0){toast('⚠️ Scores invalides');return;}
+
+  const app=getAppariementCourant();
+  const ta=app.tables[tableIdx];
+  ta.score1=s1;ta.score2=s2;ta.saisi=true;
+
+  // Calculer pct
+  const[pct1,pct2]=calculerPourcentage(s1,s2);
+  ta.pct1=pct1;ta.pct2=pct2;
+
+  // Mettre à jour les équipes
+  const e1=getEquipe(ta.equipe1id);
+  const e2=getEquipe(ta.equipe2id);
+  e1.tours.push({tour:T.tourEnCours,adversaire:e2.nom,score_nous:s1,score_eux:s2,pct:pct1});
+  e2.tours.push({tour:T.tourEnCours,adversaire:e1.nom,score_nous:s2,score_eux:s1,pct:pct2});
+  e1.pct=e1.tours.reduce((a,t)=>a+t.pct,0)/e1.tours.length;
+  e2.pct=e2.tours.reduce((a,t)=>a+t.pct,0)/e2.tours.length;
+  if(s1>s2){e1.nbVictoires++;e2.nbDefaites++;}
+  else if(s2>s1){e2.nbVictoires++;e1.nbDefaites++;}
+
+  saveTournoi();closeModal();
+  toast(`✅ Score enregistré — Pct: ${pct1}% / ${pct2}%`);
+  showTab('tables');
+}
+
+function tousScoresSaisis(){
+  const app=getAppariementCourant();
+  if(!app)return false;
+  return app.tables.every(t=>t.saisi||t.exempt);
+}
+
+function passerTourSuivant(){
+  if(!tousScoresSaisis()){toast('⚠️ Saisissez tous les scores avant de passer au tour suivant');return;}
+  if(T.tourEnCours>=T.nbTours){
+    terminerTournoi();return;
+  }
+
+  // Valider les exemptés
+  const app=getAppariementCourant();
+  app.tables.forEach(ta=>{
+    if(ta.exempt){
+      const eq=getEquipe(ta.equipe1id);
+      eq.tours.push({tour:T.tourEnCours,adversaire:'EXEMPTÉ',score_nous:null,score_eux:null,pct:70,exempt:true});
+      eq.pct=eq.tours.reduce((a,t)=>a+t.pct,0)/eq.tours.length;
+    }
+  });
+
+  T.tourEnCours++;
+  genererAppariement();
+  saveTournoi();updateHeader();
+  showTab('tables');
+  toast(`🎯 Tour ${T.tourEnCours} généré !`);
+}
+
+function terminerTournoi(){
+  showModal(`
+    <div class="modal-title">🏁 Terminer le tournoi ?</div>
+    <p style="color:var(--text2);margin-bottom:20px;font-size:14px;">Le classement final sera calculé et le tournoi sera archivé.</p>
+    <div style="display:flex;gap:10px;">
+      <button class="btn btn-gold btn-full" onclick="confirmerFin()">🏆 Terminer</button>
+      <button class="btn btn-outline-dark btn-full" onclick="closeModal()">Annuler</button>
+    </div>
+  `);
+}
+
+function confirmerFin(){
+  T.statut='termine';
+  saveTournoi();
+  saveHistorique({...T,dateFin:new Date().toISOString()});
+  closeModal();
+  showTab('classement');
+  toast('🏆 Tournoi terminé !');
+}
+
+// ═══════════════════════════════════════════════════════════
+// ONGLETS
+// ═══════════════════════════════════════════════════════════
+let currentTab='tables';
+function showTab(tab){
+  currentTab=tab;
+  ['tables','classement','resultats','config'].forEach(t=>{
+    const b=eid('nav-'+t);if(b)b.classList.toggle('active',t===tab);
+  });
+  if(tab==='tables')renderTables();
+  else if(tab==='classement')renderClassement();
+  else if(tab==='resultats')renderResultats();
+  else if(tab==='config')renderConfig();
+}
+
+// ─── TAB TABLES ───
+function renderTables(){
+  const app=getAppariementCourant();
+  if(!app){eid('tab-content').innerHTML='<div class="empty"><div class="empty-icon">🎯</div>Aucun appariement</div>';return;}
+  const restant=app.tables.filter(t=>!t.saisi&&!t.exempt).length;
+  let html=`
+    <div style="padding:12px 0 0;">
+      <div class="section-hdr" style="padding:0 2px;margin-bottom:10px;">
+        <div>
+          <div class="section-title">Tour ${T.tourEnCours} / ${T.nbTours}</div>
+          <div class="section-sub">${restant?restant+' score(s) restant(s)':'✅ Tous les scores saisis'}</div>
+        </div>
+        ${tousScoresSaisis()?`<button class="btn btn-gold btn-sm" onclick="${T.tourEnCours>=T.nbTours?'terminerTournoi()':'passerTourSuivant()'}">
+          ${T.tourEnCours>=T.nbTours?'🏁 Clôturer':'⏭ Tour suivant'}
+        </button>`:''}
+      </div>
+  `;
+  app.tables.forEach((ta,i)=>{
+    const e1=getEquipe(ta.equipe1id);
+    const e2=ta.equipe2id?getEquipe(ta.equipe2id):null;
+    const done=ta.saisi||ta.exempt;
+    html+=`<div class="table-card${done?' done':''}">
+      <div class="table-num">Table ${ta.table}</div>
+      <div class="table-vs">
+        <div class="table-team">${e1.nom}</div>
+        <div class="table-sep">vs</div>
+        <div class="table-team${ta.exempt?' exempt':''}">${e2?e2.nom:'— EXEMPTÉ —'}</div>
+      </div>`;
+    if(ta.saisi){
+      const[p1,p2]=calculerPourcentage(ta.score1,ta.score2);
+      html+=`<div class="table-score">
+        <span style="color:${ta.score1>ta.score2?'var(--green)':'var(--red)'};">
+          ${ta.score1} pts (${p1}%)
+        </span> — 
+        <span style="color:${ta.score2>ta.score1?'var(--green)':'var(--red)'};">
+          ${ta.score2} pts (${p2}%)
+        </span>
+        <span style="float:right;cursor:pointer;opacity:.6;font-size:13px;" onclick="modifierScore(${i})">✏️</span>
+      </div>`;
+    } else if(!ta.exempt){
+      html+=`<div style="margin-top:8px;"><button class="btn btn-green btn-sm btn-full" onclick="saisirScore(${i})">✏️ Saisir le score</button></div>`;
+    } else {
+      html+=`<div class="table-score"><span class="badge badge-blue">Exempté · +70%</span></div>`;
+    }
+    html+='</div>';
+  });
+  html+='</div>';
+  eid('tab-content').innerHTML=html;
+}
+
+function modifierScore(tableIdx){
+  const app=getAppariementCourant();
+  const ta=app.tables[tableIdx];
+  const e1=getEquipe(ta.equipe1id);
+  const e2=getEquipe(ta.equipe2id);
+  // Annuler l'ancien score
+  e1.tours=e1.tours.filter(t=>t.tour!==T.tourEnCours);
+  e2.tours=e2.tours.filter(t=>t.tour!==T.tourEnCours);
+  recalcPct(e1);recalcPct(e2);
+  ta.saisi=false;ta.score1=null;ta.score2=null;
+  saveTournoi();
+  saisirScore(tableIdx);
+}
+
+function recalcPct(eq){
+  if(!eq.tours.length){eq.pct=0;return;}
+  eq.pct=eq.tours.reduce((a,t)=>a+t.pct,0)/eq.tours.length;
+}
+
+// ─── TAB CLASSEMENT ───
+function renderClassement(){
+  const sorted=[...T.equipes].sort((a,b)=>{
+    if(b.pct!==a.pct)return b.pct-a.pct;
+    // départage : meilleur % individuel
+    const bestA=a.tours.length?Math.max(...a.tours.map(t=>t.pct)):0;
+    const bestB=b.tours.length?Math.max(...b.tours.map(t=>t.pct)):0;
+    return bestB-bestA;
+  });
+
+  let html=`<div style="padding-top:12px;">`;
+  // Stats
+  html+=`<div class="stat-row">
+    <div class="stat-box"><div class="stat-val">${T.tourEnCours-1+(tousScoresSaisis()&&T.tourEnCours<=T.nbTours?0:0)}</div><div class="stat-lbl">Tours joués</div></div>
+    <div class="stat-box"><div class="stat-val">${T.equipes.length}</div><div class="stat-lbl">Équipes</div></div>
+    <div class="stat-box"><div class="stat-val">${T.nbTours}</div><div class="stat-lbl">Tours prévus</div></div>
+  </div>`;
+
+  html+=`<div class="card">`;
+  sorted.forEach((eq,i)=>{
+    const medal=i===0?'🥇':i===1?'🥈':i===2?'🥉':'';
+    const rankClass=i===0?'gold':i===1?'silver':i===2?'bronze':'';
+    const pctColor=eq.pct>=70?'var(--green)':eq.pct>=50?'var(--gold)':'var(--red)';
+    html+=`<div class="rank-row">
+      <div class="rank-num ${rankClass}">${medal||i+1}</div>
+      <div class="rank-info">
+        <div class="rank-name">${eq.nom}</div>
+        <div class="rank-players" style="color:var(--text2);">${eq.j1} · ${eq.j2}</div>
+        <div style="font-size:11px;color:var(--text2);margin-top:2px;">${eq.nbVictoires}V ${eq.nbDefaites}D · ${eq.tours.length} partie${eq.tours.length>1?'s':''}</div>
+      </div>
+      <div style="text-align:right;">
+        <div class="rank-pct" style="color:${pctColor};">${eq.pct.toFixed(1)}%</div>
+        ${eq.tours.length?`<div style="font-size:10px;color:var(--text2);">best: ${Math.max(...eq.tours.map(t=>t.pct)).toFixed(0)}%</div>`:''}
+      </div>
+    </div>`;
+  });
+  html+=`</div>`;
+
+  if(T.statut==='termine'){
+    html+=`<div class="card" style="text-align:center;background:linear-gradient(135deg,#1a4a1a,#2d6b26);">
+      <div style="font-size:32px;margin-bottom:6px;">🏆</div>
+      <div style="font-size:18px;font-weight:900;color:var(--gold);margin-bottom:4px;">Vainqueur : ${sorted[0].nom}</div>
+      <div style="font-size:13px;color:rgba(255,255,255,0.6);">${sorted[0].j1} & ${sorted[0].j2} · ${sorted[0].pct.toFixed(1)}%</div>
+    </div>`;
+  }
+
+  html+='</div>';
+  eid('tab-content').innerHTML=html;
+}
+
+// ─── TAB RÉSULTATS ───
+function renderResultats(){
+  let html='<div style="padding-top:12px;">';
+  const apps=[...T.appariements].reverse();
+  if(!apps.length){html+='<div class="empty"><div class="empty-icon">📋</div>Aucun résultat encore</div>';eid('tab-content').innerHTML=html+'</div>';return;}
+  apps.forEach(app=>{
+    html+=`<div class="section-hdr"><div class="section-title">Tour ${app.tour}</div></div>`;
+    html+=`<div class="card">`;
+    app.tables.forEach(ta=>{
+      const e1=getEquipe(ta.equipe1id);
+      const e2=ta.equipe2id?getEquipe(ta.equipe2id):null;
+      html+=`<div style="display:flex;align-items:center;gap:8px;padding:8px 0;border-bottom:1px solid rgba(0,0,0,0.06);">
+        <div style="flex:1;font-size:13px;font-weight:700;">${e1.nom}</div>`;
+      if(ta.saisi){
+        const[p1,p2]=calculerPourcentage(ta.score1,ta.score2);
+        html+=`<div style="text-align:center;min-width:90px;">
+          <span style="font-size:15px;font-weight:900;color:${ta.score1>ta.score2?'var(--green)':'var(--red)'};">${ta.score1}</span>
+          <span style="color:var(--text2);"> — </span>
+          <span style="font-size:15px;font-weight:900;color:${ta.score2>ta.score1?'var(--green)':'var(--red)'};">${ta.score2}</span>
+          <div style="font-size:10px;color:var(--text2);">${p1}% · ${p2}%</div>
+        </div>`;
+      } else if(ta.exempt){
+        html+=`<div style="text-align:center;min-width:90px;"><span class="badge badge-blue">Exempté</span></div>`;
+      } else {
+        html+=`<div style="text-align:center;min-width:90px;color:var(--text2);font-size:12px;">En attente</div>`;
+      }
+      html+=`<div style="flex:1;font-size:13px;font-weight:700;text-align:right;">${e2?e2.nom:'—'}</div>
+      </div>`;
+    });
+    html+='</div>';
+  });
+  html+='</div>';
+  eid('tab-content').innerHTML=html;
+}
+
+// ─── TAB CONFIG ───
+function renderConfig(){
+  const toursJoues=T.appariements.filter(a=>a.tables.every(t=>t.saisi||t.exempt)).length;
+  let html=`<div style="padding-top:12px;">
+    <div class="card">
+      <div class="card-title">Informations</div>
+      <table style="width:100%;font-size:14px;border-collapse:collapse;">
+        <tr><td style="padding:6px 0;color:var(--text2);">Nom</td><td style="font-weight:700;">${T.nom}</td></tr>
+        <tr><td style="padding:6px 0;color:var(--text2);">Date</td><td style="font-weight:700;">${T.date}</td></tr>
+        <tr><td style="padding:6px 0;color:var(--text2);">Équipes</td><td style="font-weight:700;">${T.equipes.length}</td></tr>
+        <tr><td style="padding:6px 0;color:var(--text2);">Tours</td><td style="font-weight:700;">${toursJoues} / ${T.nbTours}</td></tr>
+        <tr><td style="padding:6px 0;color:var(--text2);">Statut</td><td><span class="badge ${T.statut==='termine'?'badge-green':'badge-gold'}">${T.statut==='termine'?'Terminé':'En cours'}</span></td></tr>
+      </table>
+    </div>
+    <div class="card">
+      <div class="card-title">Équipes</div>
+      ${T.equipes.map(e=>`<div style="display:flex;justify-content:space-between;align-items:center;padding:7px 0;border-bottom:1px solid rgba(0,0,0,0.06);">
+        <div><div style="font-size:14px;font-weight:700;">${e.nom}</div><div style="font-size:11px;color:var(--text2);">${e.j1} · ${e.j2}</div></div>
+        <div style="font-size:13px;font-weight:700;color:var(--green);">${e.pct.toFixed(1)}%</div>
+      </div>`).join('')}
+    </div>
+    <div class="card-dark">
+      <div class="card-title-light">Actions</div>
+      <button class="btn btn-outline btn-full" style="margin-bottom:8px;" onclick="exporterResultats()">📤 Exporter les résultats</button>
+      ${T.statut!=='termine'?`<button class="btn btn-red btn-full" onclick="abandonnerTournoi()">🗑 Abandonner ce tournoi</button>`:'<button class="btn btn-gold btn-full" onclick="showScreen(\'home\')">🏠 Retour à l\'accueil</button>'}
+    </div>
+  </div>`;
+  eid('tab-content').innerHTML=html;
+}
+
+function exporterResultats(){
+  const sorted=[...T.equipes].sort((a,b)=>b.pct-a.pct);
+  let txt=`TOURNOI: ${T.nom}\nDATE: ${T.date}\n\nCLASSEMENT FINAL\n${'─'.repeat(40)}\n`;
+  sorted.forEach((eq,i)=>{txt+=`${i+1}. ${eq.nom} — ${eq.pct.toFixed(1)}% (${eq.nbVictoires}V/${eq.nbDefaites}D)\n`;});
+  txt+=`\n${'─'.repeat(40)}\nDÉTAIL DES TOURS\n`;
+  T.appariements.forEach(app=>{
+    txt+=`\nTour ${app.tour}:\n`;
+    app.tables.forEach(ta=>{
+      const e1=getEquipe(ta.equipe1id);
+      const e2=ta.equipe2id?getEquipe(ta.equipe2id):null;
+      if(ta.saisi){
+        const[p1,p2]=calculerPourcentage(ta.score1,ta.score2);
+        txt+=`  Table ${ta.table}: ${e1.nom} ${ta.score1} — ${ta.score2} ${e2.nom} (${p1}%/${p2}%)\n`;
+      } else if(ta.exempt){txt+=`  Table ${ta.table}: ${e1.nom} EXEMPTÉ\n`;}
+    });
+  });
+  try{
+    navigator.clipboard.writeText(txt);
+    toast('📋 Copié dans le presse-papiers');
+  }catch(e){
+    showModal(`<div class="modal-title">Résultats</div><textarea style="width:100%;height:200px;font-size:12px;font-family:monospace;border:1px solid var(--border-light);border-radius:8px;padding:8px;" readonly>${txt}</textarea><button class="btn btn-green btn-full" style="margin-top:12px;" onclick="closeModal()">Fermer</button>`);
+  }
+}
+
+function abandonnerTournoi(){
+  showModal(`
+    <div class="modal-title">Abandonner le tournoi ?</div>
+    <p style="color:var(--text2);margin-bottom:20px;font-size:14px;">Cette action est irréversible. Le tournoi sera supprimé.</p>
+    <div style="display:flex;gap:10px;">
+      <button class="btn btn-red btn-full" onclick="confirmerAbandon()">Abandonner</button>
+      <button class="btn btn-outline-dark btn-full" onclick="closeModal()">Annuler</button>
+    </div>
+  `);
+}
+
+function confirmerAbandon(){
+  localStorage.removeItem('bct_tournoi');
+  T=null;closeModal();showScreen('home');renderHome();
+  toast('Tournoi supprimé');
+}
+
+// ═══════════════════════════════════════════════════════════
+// ACCUEIL
+// ═══════════════════════════════════════════════════════════
+function renderHome(){
+  const saved=getSavedTournoi();
+  const btnReprendre=eid('btn-reprendre');
+  if(saved&&saved.statut==='en_cours'){
+    btnReprendre.style.display='block';
+    btnReprendre.textContent=`▶️ Reprendre : ${saved.nom} (Tour ${saved.tourEnCours}/${saved.nbTours})`;
+    T=saved;
+  } else {
+    btnReprendre.style.display='none';
+  }
+  // Historique
+  try{
+    const hist=JSON.parse(localStorage.getItem('bct_tournoi_hist')||'[]');
+    const el=eid('home-historique');
+    if(!hist.length){el.innerHTML='';return;}
+    let html=`<div class="card-title-light" style="margin:4px 2px 8px;">Tournois précédents</div>`;
+    hist.forEach(h=>{
+      const sorted=[...h.equipes].sort((a,b)=>b.pct-a.pct);
+      html+=`<div class="card-dark" style="margin-bottom:8px;">
+        <div style="font-size:14px;font-weight:800;color:#fff;margin-bottom:4px;">${h.nom}</div>
+        <div style="font-size:12px;color:rgba(255,255,255,0.5);">${h.date} · ${h.equipes.length} équipes · ${h.nbTours} tours</div>
+        <div style="margin-top:8px;font-size:13px;font-weight:700;color:var(--gold);">🥇 ${sorted[0]?.nom||'—'} (${sorted[0]?.pct.toFixed(1)||'0'}%)</div>
+      </div>`;
+    });
+    el.innerHTML=html;
+  }catch(e){}
+}
+
+// ═══════════════════════════════════════════════════════════
+// INIT
+// ═══════════════════════════════════════════════════════════
+// Date par défaut
+eid('inp-date').value=new Date().toISOString().split('T')[0];
+
+renderHome();
+
+setTimeout(()=>{
+  const splash=eid('splash');
+  splash.classList.add('hide');
+  setTimeout(()=>splash.remove(),500);
+},1200);
+</script>
+</body>
+</html>
