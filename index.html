@@ -197,22 +197,46 @@ body{background:#2e6b28;background-image:repeating-linear-gradient(45deg,rgba(0,
     </div>
   </div>
 
+  <!-- ══ MODAL LISTE JOUEURS ══ -->
+  <div id="joueurs-modal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.75);z-index:10000;align-items:flex-start;justify-content:center;padding:80px 16px 20px;overflow-y:auto;">
+    <div style="background:var(--card);border-radius:var(--radius);padding:20px;width:100%;max-width:420px;">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;">
+        <div style="font-size:16px;font-weight:800;">👥 Liste des joueurs</div>
+        <button onclick="eid('joueurs-modal').style.display='none'" style="background:rgba(0,0,0,0.08);border:none;border-radius:99px;width:30px;height:30px;font-size:16px;cursor:pointer;">✕</button>
+      </div>
+      <div class="inp-row" style="margin-bottom:10px;">
+        <input class="inp" id="inp-new-joueur" type="text" placeholder="Prénom du joueur" maxlength="18" onkeydown="if(event.key==='Enter')addJoueurListe()">
+        <button class="btn btn-green" onclick="addJoueurListe()">Ajouter</button>
+      </div>
+      <div id="joueurs-liste-wrap" style="min-height:40px;display:flex;flex-wrap:wrap;gap:6px;"></div>
+    </div>
+  </div>
+
   <!-- ══ ÉCRAN CRÉATION ══ -->
   <div class="screen" id="screen-setup">
     <div class="scroll-body">
+
+      <!-- Header avec icône joueurs -->
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;">
+        <div style="font-size:15px;font-weight:800;color:#fff;">Nouveau tournoi</div>
+        <button onclick="openJoueursModal()" style="background:rgba(255,255,255,0.12);border:1px solid rgba(255,255,255,0.25);border-radius:99px;padding:7px 14px;font-size:13px;font-weight:700;color:#fff;cursor:pointer;display:flex;align-items:center;gap:6px;">
+          <span style="font-size:16px;">👥</span> Joueurs
+        </button>
+      </div>
+
       <!-- Infos tournoi -->
       <div class="card">
         <div class="card-title">Informations du tournoi</div>
         <div class="label">Nom du tournoi</div>
-        <input class="inp" id="inp-nom" type="text" placeholder="Ex: Tournoi de printemps 2025" maxlength="40" style="margin-bottom:12px;">
-        <div style="display:flex;gap:10px;">
-          <div style="flex:1;">
+        <input class="inp" id="inp-nom" type="text" placeholder="Ex: Tournoi de printemps 2025" maxlength="40" style="margin-bottom:14px;">
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;align-items:end;">
+          <div>
             <div class="label">Date</div>
-            <input class="inp" id="inp-date" type="date">
+            <input class="inp" id="inp-date" type="date" style="width:100%;">
           </div>
-          <div style="flex:1;">
+          <div>
             <div class="label">Nombre de tours</div>
-            <select class="inp" id="inp-tours">
+            <select class="inp" id="inp-tours" style="width:100%;">
               <option value="3">3 tours</option>
               <option value="4">4 tours</option>
               <option value="5" selected>5 tours</option>
@@ -223,19 +247,30 @@ body{background:#2e6b28;background-image:repeating-linear-gradient(45deg,rgba(0,
         </div>
       </div>
 
-      <!-- Équipes -->
+      <!-- Équipes : sélection depuis la liste -->
       <div class="card">
-        <div class="card-title">Équipes participantes</div>
-        <div class="label">Ajouter une équipe</div>
-        <div style="display:flex;gap:8px;margin-bottom:8px;">
-          <input class="inp" id="inp-j1" type="text" placeholder="Joueur 1" maxlength="16" style="flex:1;" onkeydown="if(event.key==='Tab'||event.key==='Enter'){event.preventDefault();eid('inp-j2').focus();}">
-          <input class="inp" id="inp-j2" type="text" placeholder="Joueur 2" maxlength="16" style="flex:1;" onkeydown="if(event.key==='Enter')addEquipe();">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;">
+          <div class="card-title" style="margin-bottom:0;">Équipes participantes</div>
+          <span id="equipes-count" style="font-size:12px;color:var(--text2);"></span>
         </div>
-        <button class="btn btn-green btn-full btn-sm" onclick="addEquipe()" style="margin-bottom:14px;">➕ Ajouter l'équipe</button>
+
+        <!-- Sélecteurs joueur 1 + joueur 2 -->
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:8px;">
+          <div>
+            <div class="label">Joueur 1</div>
+            <select class="inp" id="sel-j1"><option value="">Choisir…</option></select>
+          </div>
+          <div>
+            <div class="label">Joueur 2</div>
+            <select class="inp" id="sel-j2"><option value="">Choisir…</option></select>
+          </div>
+        </div>
+        <button class="btn btn-green btn-full btn-sm" onclick="addEquipe()" style="margin-bottom:14px;">➕ Ajouter cette équipe</button>
+
         <div class="chips-wrap" id="equipes-chips">
           <span style="font-size:12px;color:var(--text2);">Aucune équipe ajoutée</span>
         </div>
-        <div id="equipes-count" style="margin-top:10px;font-size:12px;color:var(--text2);"></div>
+        <div id="equipes-msg" style="margin-top:8px;font-size:12px;color:var(--text2);"></div>
       </div>
 
       <!-- Tables -->
@@ -265,6 +300,8 @@ body{background:#2e6b28;background-image:repeating-linear-gradient(45deg,rgba(0,
       <button class="nav-item active" id="nav-tables" onclick="showTab('tables')"><span class="ni-icon">🎯</span>Tables</button>
       <button class="nav-item" id="nav-classement" onclick="showTab('classement')"><span class="ni-icon">🏆</span>Classement</button>
       <button class="nav-item" id="nav-resultats" onclick="showTab('resultats')"><span class="ni-icon">📋</span>Résultats</button>
+      <button class="nav-item" id="nav-stats" onclick="showTab('stats')"><span class="ni-icon">📊</span>Stats</button>
+      <button class="nav-item" id="nav-historique" onclick="showTab('historique')"><span class="ni-icon">📚</span>Historique</button>
       <button class="nav-item" id="nav-config" onclick="showTab('config')"><span class="ni-icon">⚙️</span>Tournoi</button>
     </nav>
   </div>
@@ -302,6 +339,11 @@ function showScreen(name){
   const s=eid('screen-'+name);
   if(s)s.classList.add('active');
   updateHeader();
+  if(name==='setup'){
+    equipesTmp=[];
+    renderEquipesChips();
+    refreshSelectsJoueurs();
+  }
 }
 
 function updateHeader(){
@@ -339,14 +381,75 @@ function saveHistorique(t){
 // ═══════════════════════════════════════════════════════════
 let equipesTmp=[];
 
+// ── LISTE DE JOUEURS (persistante) ──
+function getJoueurs(){
+  try{return JSON.parse(localStorage.getItem('bct_joueurs')||'[]');}catch(e){return [];}
+}
+function saveJoueurs(arr){
+  try{localStorage.setItem('bct_joueurs',JSON.stringify(arr));}catch(e){}
+}
+
+function openJoueursModal(){
+  renderJoueursListe();
+  eid('joueurs-modal').style.display='flex';
+  setTimeout(()=>{const el=eid('inp-new-joueur');if(el)el.focus();},100);
+}
+
+function addJoueurListe(){
+  const nom=v('inp-new-joueur').trim();
+  if(!nom){toast('⚠️ Saisissez un prénom');return;}
+  const joueurs=getJoueurs();
+  if(joueurs.includes(nom)){toast('⚠️ Joueur déjà dans la liste');return;}
+  joueurs.push(nom);
+  joueurs.sort((a,b)=>a.localeCompare(b,'fr'));
+  saveJoueurs(joueurs);
+  eid('inp-new-joueur').value='';
+  renderJoueursListe();
+  refreshSelectsJoueurs();
+}
+
+function removeJoueurListe(nom){
+  const joueurs=getJoueurs().filter(j=>j!==nom);
+  saveJoueurs(joueurs);
+  renderJoueursListe();
+  refreshSelectsJoueurs();
+}
+
+function renderJoueursListe(){
+  const joueurs=getJoueurs();
+  const wrap=eid('joueurs-liste-wrap');
+  if(!wrap)return;
+  if(!joueurs.length){
+    wrap.innerHTML='<span style="font-size:12px;color:var(--text2);">Aucun joueur — ajoutez des joueurs ci-dessus</span>';
+    return;
+  }
+  wrap.innerHTML=joueurs.map(j=>`
+    <div class="chip">${j}<span class="chip-del" onclick="removeJoueurListe('${j.replace(/'/g,"\'")}')">✕</span></div>
+  `).join('');
+}
+
+function refreshSelectsJoueurs(){
+  const joueurs=getJoueurs();
+  const cur1=v('sel-j1'),cur2=v('sel-j2');
+  const opts='<option value="">Choisir…</option>'+joueurs.map(j=>`<option value="${j}">${j}</option>`).join('');
+  const s1=eid('sel-j1'),s2=eid('sel-j2');
+  if(s1){s1.innerHTML=opts;if(cur1)s1.value=cur1;}
+  if(s2){s2.innerHTML=opts;if(cur2)s2.value=cur2;}
+}
+
+// ── ÉQUIPES ──
 function addEquipe(){
-  const j1=v('inp-j1').trim(),j2=v('inp-j2').trim();
-  if(!j1||!j2){toast('⚠️ Saisissez les deux joueurs');return;}
+  const j1=v('sel-j1').trim(),j2=v('sel-j2').trim();
+  if(!j1||!j2){toast('⚠️ Choisissez les deux joueurs');return;}
+  if(j1===j2){toast('⚠️ Deux joueurs différents requis');return;}
   const nom=j1+' & '+j2;
-  if(equipesTmp.find(e=>e.nom===nom)){toast('⚠️ Équipe déjà ajoutée');return;}
+  if(equipesTmp.find(e=>e.nom===nom||e.j1===j1||e.j2===j1||e.j1===j2||e.j2===j2)){
+    toast('⚠️ Un joueur est déjà dans une équipe');return;
+  }
   equipesTmp.push({id:Date.now(),nom,j1,j2});
-  eid('inp-j1').value='';eid('inp-j2').value='';
-  eid('inp-j1').focus();
+  // Reset sélecteurs
+  const s1=eid('sel-j1'),s2=eid('sel-j2');
+  if(s1)s1.value='';if(s2)s2.value='';
   renderEquipesChips();
 }
 
@@ -359,14 +462,17 @@ function renderEquipesChips(){
   const wrap=eid('equipes-chips');
   if(!equipesTmp.length){
     wrap.innerHTML='<span style="font-size:12px;color:var(--text2);">Aucune équipe ajoutée</span>';
-    eid('equipes-count').textContent='';return;
+    const msg=eid('equipes-msg');if(msg)msg.textContent='';return;
   }
   wrap.innerHTML=equipesTmp.map(e=>`
     <div class="chip">${e.nom}<span class="chip-del" onclick="removeEquipe(${e.id})">✕</span></div>
   `).join('');
   const n=equipesTmp.length;
   const ok=n>=4&&n%2===0;
-  eid('equipes-count').innerHTML=`<span style="color:${ok?'var(--green)':'var(--red)'};">${n} équipe${n>1?'s':''} — ${n} joueurs</span>${!ok&&n>0?'<span style="color:var(--red);"> (nombre pair requis, min 4)</span>':''}`;
+  const msg=eid('equipes-msg');
+  const cnt=eid('equipes-count');
+  if(msg)msg.innerHTML=!ok&&n>0?`<span style="color:var(--red);">Nombre pair requis, min 4</span>`:'';
+  if(cnt)cnt.textContent=`${n} équipe${n>1?'s':''}`;
 }
 
 function startTournoi(){
@@ -385,8 +491,8 @@ function startTournoi(){
     tourEnCours:1,
     equipes:equipesTmp.map((e,i)=>({
       ...e,
-      pct:0,nbVictoires:0,nbDefaites:0,
-      tours:[],// {adversaire, score_nous, score_eux, pct_nous, pct_eux, exempt}
+      nbVictoires:0,nbDefaites:0,diffPoints:0,
+      tours:[],// {adversaire, score_nous, score_eux, diff, victoire}
     })),
     appariements:[],// [{tour, tables:[{equipe1id, equipe2id, score1, score2, saisi}]}]
     statut:'en_cours'
@@ -397,7 +503,10 @@ function startTournoi(){
   saveTournoi();
 
   // Reset form
-  equipesTmp=[];eid('inp-j1').value='';eid('inp-j2').value='';eid('inp-nom').value='';
+  equipesTmp=[];
+  const s1=eid('sel-j1'),s2=eid('sel-j2');
+  if(s1)s1.value='';if(s2)s2.value='';
+  const nom_el=eid('inp-nom');if(nom_el)nom_el.value='';
   renderEquipesChips();
 
   showScreen('tournoi');updateHeader();
@@ -429,33 +538,17 @@ function genererAppariement(){
     });
   });
 
-  // Qui a été exempté
-  const exemptions={};
-  T.appariements.forEach(a=>{
-    a.tables.forEach(ta=>{
-      if(!ta.equipe2id)exemptions[ta.equipe1id]=(exemptions[ta.equipe1id]||0)+1;
-    });
-  });
+
 
   // Trier par % décroissant (sauf tour 1 : aléatoire)
   if(tour===1){
     // Mélange aléatoire
     for(let i=eq.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[eq[i],eq[j]]=[eq[j],eq[i]];}
   } else {
-    eq.sort((a,b)=>b.pct-a.pct);
+    eq.sort((a,b)=>b.nbVictoires!==a.nbVictoires?b.nbVictoires-a.nbVictoires:(b.diffPoints||0)-(a.diffPoints||0));
   }
 
-  // Gérer exemption si nombre impair
-  let exempt=null;
-  if(eq.length%2!==0){
-    // Choisir l'équipe exemptée : celle qui l'a été le moins, parmi les dernières du classement
-    let minExempt=Infinity,candidat=null;
-    for(let i=eq.length-1;i>=0;i--){
-      const n=exemptions[eq[i].id]||0;
-      if(n<minExempt){minExempt=n;candidat=i;}
-    }
-    exempt=eq.splice(candidat,1)[0];
-  }
+  // Nombre pair garanti — pas d'exemption
 
   // Apparier
   const used=new Set();
@@ -487,7 +580,7 @@ function genererAppariement(){
     equipe1id:p.e1.id,equipe2id:p.e2.id,
     score1:null,score2:null,saisi:false
   }));
-  if(exempt)tables.push({table:tables.length+1,equipe1id:exempt.id,equipe2id:null,score1:null,score2:null,saisi:false,exempt:true});
+
 
   T.appariements.push({tour,tables});
 }
@@ -500,29 +593,7 @@ function getEquipe(id){
   return T.equipes.find(e=>e.id===id)||null;
 }
 
-// ═══════════════════════════════════════════════════════════
-// CALCUL POURCENTAGES (règlement Cannes)
-// ═══════════════════════════════════════════════════════════
-function calculerPourcentage(scoreA,scoreB){
-  if(scoreA===scoreB)return[50,50];
-  const total=scoreA+scoreB;
-  if(total===0)return[50,50];
-  const ecart=Math.abs(scoreA-scoreB);
-  const gagnant=scoreA>scoreB?'A':'B';
-  // Barème du règlement
-  let pctGagnant;
-  if(ecart<=2)pctGagnant=70;
-  else if(ecart<=100)pctGagnant=70+Math.floor((ecart-2)/100*5);
-  else if(ecart<=200)pctGagnant=75;
-  else if(ecart<=400)pctGagnant=80;
-  else if(ecart<=600)pctGagnant=85;
-  else if(ecart<=800)pctGagnant=90;
-  else if(ecart<=1000)pctGagnant=95;
-  else if(ecart<=1950)pctGagnant=99;
-  else pctGagnant=100;
-  const pctPerdant=100-pctGagnant;
-  return gagnant==='A'?[pctGagnant,pctPerdant]:[pctPerdant,pctGagnant];
-}
+
 
 function saisirScore(tableIdx){
   const app=getAppariementCourant();
@@ -561,22 +632,22 @@ function validerScore(tableIdx){
   const ta=app.tables[tableIdx];
   ta.score1=s1;ta.score2=s2;ta.saisi=true;
 
-  // Calculer pct
-  const[pct1,pct2]=calculerPourcentage(s1,s2);
-  ta.pct1=pct1;ta.pct2=pct2;
-
   // Mettre à jour les équipes
   const e1=getEquipe(ta.equipe1id);
   const e2=getEquipe(ta.equipe2id);
-  e1.tours.push({tour:T.tourEnCours,adversaire:e2.nom,score_nous:s1,score_eux:s2,pct:pct1});
-  e2.tours.push({tour:T.tourEnCours,adversaire:e1.nom,score_nous:s2,score_eux:s1,pct:pct2});
-  e1.pct=e1.tours.reduce((a,t)=>a+t.pct,0)/e1.tours.length;
-  e2.pct=e2.tours.reduce((a,t)=>a+t.pct,0)/e2.tours.length;
-  if(s1>s2){e1.nbVictoires++;e2.nbDefaites++;}
-  else if(s2>s1){e2.nbVictoires++;e1.nbDefaites++;}
+  const diff1=s1-s2;
+  const diff2=s2-s1;
+  e1.tours.push({tour:T.tourEnCours,adversaire:e2.nom,score_nous:s1,score_eux:s2,diff:diff1,victoire:s1>s2});
+  e2.tours.push({tour:T.tourEnCours,adversaire:e1.nom,score_nous:s2,score_eux:s1,diff:diff2,victoire:s2>s1});
+  e1.nbVictoires=e1.tours.filter(t=>t.victoire).length;
+  e1.nbDefaites=e1.tours.filter(t=>!t.victoire).length;
+  e1.diffPoints=e1.tours.reduce((a,t)=>a+t.diff,0);
+  e2.nbVictoires=e2.tours.filter(t=>t.victoire).length;
+  e2.nbDefaites=e2.tours.filter(t=>!t.victoire).length;
+  e2.diffPoints=e2.tours.reduce((a,t)=>a+t.diff,0);
 
   saveTournoi();closeModal();
-  toast(`✅ Score enregistré — Pct: ${pct1}% / ${pct2}%`);
+  toast(`✅ Score enregistré`);
   showTab('tables');
 }
 
@@ -591,16 +662,6 @@ function passerTourSuivant(){
   if(T.tourEnCours>=T.nbTours){
     terminerTournoi();return;
   }
-
-  // Valider les exemptés
-  const app=getAppariementCourant();
-  app.tables.forEach(ta=>{
-    if(ta.exempt){
-      const eq=getEquipe(ta.equipe1id);
-      eq.tours.push({tour:T.tourEnCours,adversaire:'EXEMPTÉ',score_nous:null,score_eux:null,pct:70,exempt:true});
-      eq.pct=eq.tours.reduce((a,t)=>a+t.pct,0)/eq.tours.length;
-    }
-  });
 
   T.tourEnCours++;
   genererAppariement();
@@ -635,12 +696,14 @@ function confirmerFin(){
 let currentTab='tables';
 function showTab(tab){
   currentTab=tab;
-  ['tables','classement','resultats','config'].forEach(t=>{
+  ['tables','classement','resultats','stats','historique','config'].forEach(t=>{
     const b=eid('nav-'+t);if(b)b.classList.toggle('active',t===tab);
   });
   if(tab==='tables')renderTables();
   else if(tab==='classement')renderClassement();
   else if(tab==='resultats')renderResultats();
+  else if(tab==='stats')renderStats();
+  else if(tab==='historique')renderHistorique();
   else if(tab==='config')renderConfig();
 }
 
@@ -673,20 +736,14 @@ function renderTables(){
         <div class="table-team${ta.exempt?' exempt':''}">${e2?e2.nom:'— EXEMPTÉ —'}</div>
       </div>`;
     if(ta.saisi){
-      const[p1,p2]=calculerPourcentage(ta.score1,ta.score2);
       html+=`<div class="table-score">
-        <span style="color:${ta.score1>ta.score2?'var(--green)':'var(--red)'};">
-          ${ta.score1} pts (${p1}%)
-        </span> — 
-        <span style="color:${ta.score2>ta.score1?'var(--green)':'var(--red)'};">
-          ${ta.score2} pts (${p2}%)
-        </span>
+        <span style="color:rgba(255,255,255,0.85);font-weight:700;">${ta.score1} pts</span>
+        <span style="color:rgba(255,255,255,0.4);">—</span>
+        <span style="color:rgba(255,255,255,0.85);font-weight:700;">${ta.score2} pts</span>
         <span style="float:right;cursor:pointer;opacity:.6;font-size:13px;" onclick="modifierScore(${i})">✏️</span>
       </div>`;
-    } else if(!ta.exempt){
-      html+=`<div style="margin-top:8px;"><button class="btn btn-green btn-sm btn-full" onclick="saisirScore(${i})">✏️ Saisir le score</button></div>`;
     } else {
-      html+=`<div class="table-score"><span class="badge badge-blue">Exempté · +70%</span></div>`;
+      html+=`<div style="margin-top:8px;"><button class="btn btn-green btn-sm btn-full" onclick="saisirScore(${i})">✏️ Saisir le score</button></div>`;
     }
     html+='</div>';
   });
@@ -702,25 +759,25 @@ function modifierScore(tableIdx){
   // Annuler l'ancien score
   e1.tours=e1.tours.filter(t=>t.tour!==T.tourEnCours);
   e2.tours=e2.tours.filter(t=>t.tour!==T.tourEnCours);
-  recalcPct(e1);recalcPct(e2);
+  recalcStats(e1);recalcStats(e2);
   ta.saisi=false;ta.score1=null;ta.score2=null;
   saveTournoi();
   saisirScore(tableIdx);
 }
 
-function recalcPct(eq){
-  if(!eq.tours.length){eq.pct=0;return;}
-  eq.pct=eq.tours.reduce((a,t)=>a+t.pct,0)/eq.tours.length;
+function recalcStats(eq){
+  eq.nbVictoires=eq.tours.filter(t=>t.victoire).length;
+  eq.nbDefaites=eq.tours.filter(t=>!t.victoire).length;
+  eq.diffPoints=eq.tours.reduce((a,t)=>a+t.diff,0);
 }
 
 // ─── TAB CLASSEMENT ───
 function renderClassement(){
   const sorted=[...T.equipes].sort((a,b)=>{
-    if(b.pct!==a.pct)return b.pct-a.pct;
-    // départage : meilleur % individuel
-    const bestA=a.tours.length?Math.max(...a.tours.map(t=>t.pct)):0;
-    const bestB=b.tours.length?Math.max(...b.tours.map(t=>t.pct)):0;
-    return bestB-bestA;
+    // 1. Nombre de victoires
+    if(b.nbVictoires!==a.nbVictoires)return b.nbVictoires-a.nbVictoires;
+    // 2. Différence de points (départage)
+    return (b.diffPoints||0)-(a.diffPoints||0);
   });
 
   let html=`<div style="padding-top:12px;">`;
@@ -735,7 +792,7 @@ function renderClassement(){
   sorted.forEach((eq,i)=>{
     const medal=i===0?'🥇':i===1?'🥈':i===2?'🥉':'';
     const rankClass=i===0?'gold':i===1?'silver':i===2?'bronze':'';
-    const pctColor=eq.pct>=70?'var(--green)':eq.pct>=50?'var(--gold)':'var(--red)';
+    const pctColor=eq.nbVictoires>eq.nbDefaites?'var(--green)':eq.nbVictoires===eq.nbDefaites?'var(--gold)':'var(--red)';
     html+=`<div class="rank-row">
       <div class="rank-num ${rankClass}">${medal||i+1}</div>
       <div class="rank-info">
@@ -744,8 +801,8 @@ function renderClassement(){
         <div style="font-size:11px;color:var(--text2);margin-top:2px;">${eq.nbVictoires}V ${eq.nbDefaites}D · ${eq.tours.length} partie${eq.tours.length>1?'s':''}</div>
       </div>
       <div style="text-align:right;">
-        <div class="rank-pct" style="color:${pctColor};">${eq.pct.toFixed(1)}%</div>
-        ${eq.tours.length?`<div style="font-size:10px;color:var(--text2);">best: ${Math.max(...eq.tours.map(t=>t.pct)).toFixed(0)}%</div>`:''}
+        <div class="rank-pct" style="color:${pctColor};">${eq.nbVictoires}V</div>
+        <div style="font-size:11px;color:var(--text2);">diff: ${(eq.diffPoints||0)>0?'+':''}${eq.diffPoints||0}</div>
       </div>
     </div>`;
   });
@@ -755,7 +812,7 @@ function renderClassement(){
     html+=`<div class="card" style="text-align:center;background:linear-gradient(135deg,#1a4a1a,#2d6b26);">
       <div style="font-size:32px;margin-bottom:6px;">🏆</div>
       <div style="font-size:18px;font-weight:900;color:var(--gold);margin-bottom:4px;">Vainqueur : ${sorted[0].nom}</div>
-      <div style="font-size:13px;color:rgba(255,255,255,0.6);">${sorted[0].j1} & ${sorted[0].j2} · ${sorted[0].pct.toFixed(1)}%</div>
+      <div style="font-size:13px;color:rgba(255,255,255,0.6);">${sorted[0].j1} & ${sorted[0].j2} · ${sorted[0].nbVictoires}V / diff ${(sorted[0].diffPoints||0)>0?'+':''}${sorted[0].diffPoints||0}</div>
     </div>`;
   }
 
@@ -771,23 +828,24 @@ function renderResultats(){
   apps.forEach(app=>{
     html+=`<div class="section-hdr"><div class="section-title">Tour ${app.tour}</div></div>`;
     html+=`<div class="card">`;
-    app.tables.forEach(ta=>{
+    app.tables.forEach((ta,ti)=>{
       const e1=getEquipe(ta.equipe1id);
       const e2=ta.equipe2id?getEquipe(ta.equipe2id):null;
-      html+=`<div style="display:flex;align-items:center;gap:8px;padding:8px 0;border-bottom:1px solid rgba(0,0,0,0.06);">
+      // Trouver l'index réel dans l'appariement courant pour modifier
+      const appIdx=T.appariements.findIndex(a=>a.tour===app.tour);
+      html+=`<div style="display:flex;align-items:center;gap:8px;padding:10px 0;border-bottom:1px solid rgba(0,0,0,0.06);">
         <div style="flex:1;font-size:13px;font-weight:700;">${e1.nom}</div>`;
       if(ta.saisi){
-        const[p1,p2]=calculerPourcentage(ta.score1,ta.score2);
-        html+=`<div style="text-align:center;min-width:90px;">
-          <span style="font-size:15px;font-weight:900;color:${ta.score1>ta.score2?'var(--green)':'var(--red)'};">${ta.score1}</span>
+        html+=`<div style="text-align:center;min-width:100px;">
+          <span style="font-size:16px;font-weight:900;color:var(--text);">${ta.score1}</span>
           <span style="color:var(--text2);"> — </span>
-          <span style="font-size:15px;font-weight:900;color:${ta.score2>ta.score1?'var(--green)':'var(--red)'};">${ta.score2}</span>
-          <div style="font-size:10px;color:var(--text2);">${p1}% · ${p2}%</div>
+          <span style="font-size:16px;font-weight:900;color:var(--text);">${ta.score2}</span>
+          <div style="margin-top:3px;">
+            <button onclick="modifierScoreResultat(${appIdx},${ti})" style="background:rgba(0,0,0,0.08);border:1px solid var(--border-light);border-radius:6px;padding:3px 8px;font-size:11px;cursor:pointer;font-family:inherit;color:var(--text2);">✏️ Modifier</button>
+          </div>
         </div>`;
-      } else if(ta.exempt){
-        html+=`<div style="text-align:center;min-width:90px;"><span class="badge badge-blue">Exempté</span></div>`;
       } else {
-        html+=`<div style="text-align:center;min-width:90px;color:var(--text2);font-size:12px;">En attente</div>`;
+        html+=`<div style="text-align:center;min-width:100px;color:var(--text2);font-size:12px;">En attente</div>`;
       }
       html+=`<div style="flex:1;font-size:13px;font-weight:700;text-align:right;">${e2?e2.nom:'—'}</div>
       </div>`;
@@ -798,7 +856,272 @@ function renderResultats(){
   eid('tab-content').innerHTML=html;
 }
 
+function modifierScoreResultat(appIdx,tableIdx){
+  const app=T.appariements[appIdx];
+  const ta=app.tables[tableIdx];
+  const e1=getEquipe(ta.equipe1id);
+  const e2=getEquipe(ta.equipe2id);
+  // Annuler l'ancien score des équipes
+  e1.tours=e1.tours.filter(t=>t.tour!==app.tour);
+  e2.tours=e2.tours.filter(t=>t.tour!==app.tour);
+  recalcStats(e1);recalcStats(e2);
+  ta.saisi=false;ta.score1=null;ta.score2=null;
+  saveTournoi();
+  // Ouvrir modal saisie
+  showModal(`
+    <div class="modal-title">Modifier le score — Tour ${app.tour} · Table ${ta.table}</div>
+    <div style="margin-bottom:16px;">
+      <div class="score-row"><div class="team-name">${e1.nom}</div><input class="score-input" id="sc1" type="number" min="0" max="9999" placeholder="0"></div>
+      <div class="score-row"><div class="team-name">${e2.nom}</div><input class="score-input" id="sc2" type="number" min="0" max="9999" placeholder="0"></div>
+    </div>
+    <div style="display:flex;gap:10px;">
+      <button class="btn btn-green btn-full" onclick="validerScoreEdit(${appIdx},${tableIdx})">✅ Valider</button>
+      <button class="btn btn-outline-dark btn-full" onclick="closeModal()">Annuler</button>
+    </div>
+  `);
+  setTimeout(()=>{const el=eid('sc1');if(el){el.value=ta.score1||'';el.focus();}},100);
+}
+
+function validerScoreEdit(appIdx,tableIdx){
+  const s1=parseInt(v('sc1'));
+  const s2=parseInt(v('sc2'));
+  if(isNaN(s1)||isNaN(s2)||s1<0||s2<0){toast('⚠️ Scores invalides');return;}
+  const app=T.appariements[appIdx];
+  const ta=app.tables[tableIdx];
+  const e1=getEquipe(ta.equipe1id);
+  const e2=getEquipe(ta.equipe2id);
+  ta.score1=s1;ta.score2=s2;ta.saisi=true;
+  const diff1=s1-s2,diff2=s2-s1;
+  e1.tours.push({tour:app.tour,adversaire:e2.nom,score_nous:s1,score_eux:s2,diff:diff1,victoire:s1>s2});
+  e2.tours.push({tour:app.tour,adversaire:e1.nom,score_nous:s2,score_eux:s1,diff:diff2,victoire:s2>s1});
+  recalcStats(e1);recalcStats(e2);
+  saveTournoi();closeModal();
+  toast('✅ Score modifié');
+  renderResultats();
+}
+
 // ─── TAB CONFIG ───
+
+// ═══════════════════════════════════════════════════════════
+// STATS
+// ═══════════════════════════════════════════════════════════
+function renderStats(){
+  if(!T){eid('tab-content').innerHTML='<div class="empty"><div class="empty-icon">📊</div>Aucun tournoi en cours</div>';return;}
+  const equipes=[...T.equipes];
+  const sorted=[...equipes].sort((a,b)=>b.nbVictoires!==a.nbVictoires?b.nbVictoires-a.nbVictoires:(b.diffPoints||0)-(a.diffPoints||0));
+  const totalParties=T.appariements.reduce((s,a)=>s+a.tables.filter(t=>t.saisi).length,0);
+  const totalTours=T.appariements.filter(a=>a.tables.every(t=>t.saisi)).length;
+
+  // Stats globales
+  let maxDiff=-Infinity,minDiff=Infinity,maxEq=null,minEq=null;
+  equipes.forEach(e=>{
+    if((e.diffPoints||0)>maxDiff){maxDiff=e.diffPoints||0;maxEq=e;}
+    if((e.diffPoints||0)<minDiff){minDiff=e.diffPoints||0;minEq=e;}
+  });
+
+  // Meilleure victoire (plus grand écart)
+  let bestWin=null,bestWinEcart=0;
+  T.appariements.forEach(app=>{
+    app.tables.forEach(ta=>{
+      if(!ta.saisi)return;
+      const ecart=Math.abs(ta.score1-ta.score2);
+      if(ecart>bestWinEcart){
+        bestWinEcart=ecart;
+        const winner=ta.score1>ta.score2?getEquipe(ta.equipe1id):getEquipe(ta.equipe2id);
+        const loser=ta.score1>ta.score2?getEquipe(ta.equipe2id):getEquipe(ta.equipe1id);
+        bestWin={winner,loser,s1:Math.max(ta.score1,ta.score2),s2:Math.min(ta.score1,ta.score2),tour:app.tour};
+      }
+    });
+  });
+
+  let html=`<div style="padding-top:12px;">`;
+
+  // Boites stats globales
+  html+=`<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:12px;">
+    <div class="stat-box"><div class="stat-val">${T.equipes.length}</div><div class="stat-lbl">Équipes</div></div>
+    <div class="stat-box"><div class="stat-val">${totalTours}</div><div class="stat-lbl">Tours joués</div></div>
+    <div class="stat-box"><div class="stat-val">${totalParties}</div><div class="stat-lbl">Parties</div></div>
+  </div>`;
+
+  // Tableau classement stats par équipe
+  html+=`<div class="card">
+    <div class="card-title">Statistiques par équipe</div>
+    <table class="t">
+      <thead><tr>
+        <th>Équipe</th>
+        <th style="text-align:center;">V</th>
+        <th style="text-align:center;">D</th>
+        <th style="text-align:center;">%V</th>
+        <th style="text-align:right;">Diff pts</th>
+        <th style="text-align:right;">Moy/partie</th>
+      </tr></thead>
+      <tbody>
+      ${sorted.map((e,i)=>{
+        const pv=e.tours.length?Math.round(e.nbVictoires/e.tours.length*100):0;
+        const moy=e.tours.length?Math.round(e.tours.reduce((s,t)=>s+(t.score_nous||0),0)/e.tours.length):0;
+        const medal=i===0?'🥇 ':i===1?'🥈 ':i===2?'🥉 ':'';
+        return `<tr>
+          <td><div style="font-weight:800;">${medal}${e.nom}</div><div style="font-size:10px;color:var(--text2);">${e.j1} · ${e.j2}</div></td>
+          <td style="text-align:center;font-weight:900;color:var(--green);">${e.nbVictoires}</td>
+          <td style="text-align:center;font-weight:700;color:var(--red);">${e.nbDefaites}</td>
+          <td style="text-align:center;font-weight:700;">${pv}%</td>
+          <td style="text-align:right;font-weight:800;color:${(e.diffPoints||0)>=0?'var(--green)':'var(--red)'}">${(e.diffPoints||0)>0?'+':''}${e.diffPoints||0}</td>
+          <td style="text-align:right;color:var(--text2);">${moy}</td>
+        </tr>`;
+      }).join('')}
+      </tbody>
+    </table>
+  </div>`;
+
+  // Records
+  html+=`<div class="card">
+    <div class="card-title">Records du tournoi</div>`;
+  if(maxEq)html+=`<div style="display:flex;justify-content:space-between;padding:7px 0;border-bottom:1px solid rgba(0,0,0,0.06);">
+    <div style="font-size:13px;color:var(--text2);">🏅 Meilleure diff. de points</div>
+    <div style="font-size:13px;font-weight:800;color:var(--green);">${maxEq.nom} +${maxDiff}</div>
+  </div>`;
+  if(minEq&&minEq!==maxEq)html+=`<div style="display:flex;justify-content:space-between;padding:7px 0;border-bottom:1px solid rgba(0,0,0,0.06);">
+    <div style="font-size:13px;color:var(--text2);">📉 Plus faible diff. de points</div>
+    <div style="font-size:13px;font-weight:800;color:var(--red);">${minEq.nom} ${minDiff}</div>
+  </div>`;
+  if(bestWin)html+=`<div style="display:flex;justify-content:space-between;padding:7px 0;">
+    <div style="font-size:13px;color:var(--text2);">💪 Plus grand écart (tour ${bestWin.tour})</div>
+    <div style="font-size:13px;font-weight:800;">${bestWin.winner.nom} ${bestWin.s1}—${bestWin.s2}</div>
+  </div>`;
+  html+=`</div>`;
+
+  // Détail par équipe : tours joués
+  html+=`<div class="card">
+    <div class="card-title">Détail des parties</div>`;
+  sorted.forEach(e=>{
+    if(!e.tours.length)return;
+    html+=`<div style="margin-bottom:14px;">
+      <div style="font-size:13px;font-weight:800;margin-bottom:6px;">${e.nom}</div>
+      <table class="t" style="font-size:12px;">
+        <thead><tr><th>Tour</th><th>Adversaire</th><th style="text-align:right;">Score</th><th style="text-align:right;">Résultat</th></tr></thead>
+        <tbody>
+        ${e.tours.map(t=>`<tr>
+          <td style="color:var(--text2);">T${t.tour}</td>
+          <td>${t.adversaire}</td>
+          <td style="text-align:right;font-weight:700;">${t.score_nous} — ${t.score_eux}</td>
+          <td style="text-align:right;"><span class="badge ${t.victoire?'badge-green':'badge-red'}">${t.victoire?'Victoire':'Défaite'}</span></td>
+        </tr>`).join('')}
+        </tbody>
+      </table>
+    </div>`;
+  });
+  html+=`</div></div>`;
+  eid('tab-content').innerHTML=html;
+}
+
+// ═══════════════════════════════════════════════════════════
+// HISTORIQUE TOURNOIS
+// ═══════════════════════════════════════════════════════════
+function renderHistorique(){
+  let hist=[];
+  try{hist=JSON.parse(localStorage.getItem('bct_tournoi_hist')||'[]');}catch(e){}
+
+  let html=`<div style="padding-top:12px;">`;
+
+  if(!hist.length){
+    html+=`<div class="empty"><div class="empty-icon">📚</div>Aucun tournoi archivé<br><span style="font-size:12px;">Les tournois terminés apparaîtront ici</span></div>`;
+    eid('tab-content').innerHTML=html+'</div>';return;
+  }
+
+  html+=`<div style="font-size:12px;color:rgba(255,255,255,0.45);margin-bottom:10px;">${hist.length} tournoi${hist.length>1?'s':''} archivé${hist.length>1?'s':''}</div>`;
+
+  hist.forEach((h,hi)=>{
+    const sorted=[...h.equipes].sort((a,b)=>b.nbVictoires!==a.nbVictoires?b.nbVictoires-a.nbVictoires:(b.diffPoints||0)-(a.diffPoints||0));
+    html+=`<div class="card" style="margin-bottom:10px;">
+      <!-- En-tête tournoi -->
+      <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:10px;">
+        <div>
+          <div style="font-size:16px;font-weight:800;color:var(--text);">${h.nom}</div>
+          <div style="font-size:12px;color:var(--text2);">${h.date} · ${h.equipes.length} équipes · ${h.nbTours} tours</div>
+        </div>
+        <span class="badge badge-green">Terminé</span>
+      </div>
+
+      <!-- Podium -->
+      <div style="background:linear-gradient(135deg,#fdf3d0,#fff8e8);border-radius:10px;padding:10px 12px;margin-bottom:10px;">
+        <div style="font-size:10px;font-weight:800;color:var(--text2);text-transform:uppercase;letter-spacing:.06em;margin-bottom:6px;">Podium</div>
+        ${sorted.slice(0,3).map((e,i)=>`<div style="display:flex;align-items:center;gap:8px;padding:4px 0;">
+          <span style="font-size:16px;">${['🥇','🥈','🥉'][i]}</span>
+          <div style="flex:1;">
+            <span style="font-size:13px;font-weight:800;color:var(--text);">${e.nom}</span>
+            <span style="font-size:11px;color:var(--text2);margin-left:6px;">${e.j1} · ${e.j2}</span>
+          </div>
+          <div style="text-align:right;">
+            <span style="font-size:13px;font-weight:800;color:var(--green);">${e.nbVictoires}V</span>
+            <span style="font-size:11px;color:var(--text2);"> diff ${(e.diffPoints||0)>0?'+':''}${e.diffPoints||0}</span>
+          </div>
+        </div>`).join('')}
+      </div>
+
+      <!-- Classement complet (dépliable) -->
+      <div id="hist-detail-${hi}" style="display:none;">
+        <div class="divider"></div>
+        <div style="font-size:11px;font-weight:800;color:var(--text2);text-transform:uppercase;margin-bottom:8px;">Classement complet</div>
+        <table class="t">
+          <thead><tr><th>#</th><th>Équipe</th><th>Joueurs</th><th style="text-align:center;">V</th><th style="text-align:center;">D</th><th style="text-align:right;">Diff</th></tr></thead>
+          <tbody>
+          ${sorted.map((e,i)=>`<tr>
+            <td class="num">${i+1}</td>
+            <td class="bold">${e.nom}</td>
+            <td style="font-size:11px;color:var(--text2);">${e.j1} · ${e.j2}</td>
+            <td style="text-align:center;font-weight:800;color:var(--green);">${e.nbVictoires}</td>
+            <td style="text-align:center;color:var(--red);">${e.nbDefaites}</td>
+            <td style="text-align:right;font-weight:700;color:${(e.diffPoints||0)>=0?'var(--green)':'var(--red)'}">${(e.diffPoints||0)>0?'+':''}${e.diffPoints||0}</td>
+          </tr>`).join('')}
+          </tbody>
+        </table>
+
+        <div class="divider"></div>
+        <div style="font-size:11px;font-weight:800;color:var(--text2);text-transform:uppercase;margin-bottom:8px;">Tous les résultats</div>
+        ${h.appariements.map(app=>`
+          <div style="font-size:12px;font-weight:800;color:var(--text2);margin:8px 0 4px;">Tour ${app.tour}</div>
+          ${app.tables.map(ta=>{
+            const e1=h.equipes.find(e=>e.id===ta.equipe1id);
+            const e2=h.equipes.find(e=>e.id===ta.equipe2id);
+            if(!e1||!e2||!ta.saisi)return '';
+            return `<div style="display:flex;align-items:center;gap:6px;padding:5px 0;border-bottom:1px solid rgba(0,0,0,0.05);">
+              <div style="flex:1;font-size:12px;font-weight:700;">${e1.nom}</div>
+              <div style="font-size:14px;font-weight:900;min-width:70px;text-align:center;">${ta.score1} — ${ta.score2}</div>
+              <div style="flex:1;font-size:12px;font-weight:700;text-align:right;">${e2.nom}</div>
+            </div>`;
+          }).join('')}
+        `).join('')}
+      </div>
+
+      <button onclick="toggleHistDetail(${hi})" id="hist-btn-${hi}" style="background:none;border:none;color:var(--text2);font-size:12px;font-weight:700;cursor:pointer;padding:6px 0 0;font-family:inherit;width:100%;text-align:center;">
+        ▼ Voir le détail
+      </button>
+    </div>`;
+  });
+
+  html+=`<button class="btn btn-red btn-sm" onclick="clearHistorique()" style="margin-top:4px;opacity:0.6;">🗑 Effacer l'historique</button>`;
+  html+='</div>';
+  eid('tab-content').innerHTML=html;
+}
+
+function toggleHistDetail(i){
+  const el=eid('hist-detail-'+i);
+  const btn=eid('hist-btn-'+i);
+  if(el.style.display==='none'){el.style.display='block';btn.textContent='▲ Masquer le détail';}
+  else{el.style.display='none';btn.textContent='▼ Voir le détail';}
+}
+
+function clearHistorique(){
+  showModal(`
+    <div class="modal-title">Effacer l'historique ?</div>
+    <p style="color:var(--text2);margin-bottom:20px;font-size:14px;">Tous les tournois archivés seront supprimés.</p>
+    <div style="display:flex;gap:10px;">
+      <button class="btn btn-red btn-full" onclick="localStorage.removeItem('bct_tournoi_hist');closeModal();renderHistorique();">Effacer</button>
+      <button class="btn btn-outline-dark btn-full" onclick="closeModal()">Annuler</button>
+    </div>
+  `);
+}
+
 function renderConfig(){
   const toursJoues=T.appariements.filter(a=>a.tables.every(t=>t.saisi||t.exempt)).length;
   let html=`<div style="padding-top:12px;">
@@ -816,7 +1139,7 @@ function renderConfig(){
       <div class="card-title">Équipes</div>
       ${T.equipes.map(e=>`<div style="display:flex;justify-content:space-between;align-items:center;padding:7px 0;border-bottom:1px solid rgba(0,0,0,0.06);">
         <div><div style="font-size:14px;font-weight:700;">${e.nom}</div><div style="font-size:11px;color:var(--text2);">${e.j1} · ${e.j2}</div></div>
-        <div style="font-size:13px;font-weight:700;color:var(--green);">${e.pct.toFixed(1)}%</div>
+        <div style="font-size:13px;font-weight:700;color:var(--green);">${e.nbVictoires}V · diff ${(e.diffPoints||0)>0?'+':''}${e.diffPoints||0}</div>
       </div>`).join('')}
     </div>
     <div class="card-dark">
@@ -829,9 +1152,9 @@ function renderConfig(){
 }
 
 function exporterResultats(){
-  const sorted=[...T.equipes].sort((a,b)=>b.pct-a.pct);
+  const sorted=[...T.equipes].sort((a,b)=>b.nbVictoires!==a.nbVictoires?b.nbVictoires-a.nbVictoires:(b.diffPoints||0)-(a.diffPoints||0));
   let txt=`TOURNOI: ${T.nom}\nDATE: ${T.date}\n\nCLASSEMENT FINAL\n${'─'.repeat(40)}\n`;
-  sorted.forEach((eq,i)=>{txt+=`${i+1}. ${eq.nom} — ${eq.pct.toFixed(1)}% (${eq.nbVictoires}V/${eq.nbDefaites}D)\n`;});
+  sorted.forEach((eq,i)=>{txt+=`${i+1}. ${eq.nom} — ${eq.nbVictoires}V/${eq.nbDefaites}D diff:${(eq.diffPoints||0)>0?'+':''}${eq.diffPoints||0}\n`;});
   txt+=`\n${'─'.repeat(40)}\nDÉTAIL DES TOURS\n`;
   T.appariements.forEach(app=>{
     txt+=`\nTour ${app.tour}:\n`;
@@ -889,11 +1212,11 @@ function renderHome(){
     if(!hist.length){el.innerHTML='';return;}
     let html=`<div class="card-title-light" style="margin:4px 2px 8px;">Tournois précédents</div>`;
     hist.forEach(h=>{
-      const sorted=[...h.equipes].sort((a,b)=>b.pct-a.pct);
+      const sorted=[...h.equipes].sort((a,b)=>b.nbVictoires!==a.nbVictoires?b.nbVictoires-a.nbVictoires:(b.diffPoints||0)-(a.diffPoints||0));
       html+=`<div class="card-dark" style="margin-bottom:8px;">
         <div style="font-size:14px;font-weight:800;color:#fff;margin-bottom:4px;">${h.nom}</div>
         <div style="font-size:12px;color:rgba(255,255,255,0.5);">${h.date} · ${h.equipes.length} équipes · ${h.nbTours} tours</div>
-        <div style="margin-top:8px;font-size:13px;font-weight:700;color:var(--gold);">🥇 ${sorted[0]?.nom||'—'} (${sorted[0]?.pct.toFixed(1)||'0'}%)</div>
+        <div style="margin-top:8px;font-size:13px;font-weight:700;color:var(--gold);">🥇 ${sorted[0]?.nom||'—'} · ${sorted[0]?.nbVictoires||0}V</div>
       </div>`;
     });
     el.innerHTML=html;
@@ -907,6 +1230,7 @@ function renderHome(){
 eid('inp-date').value=new Date().toISOString().split('T')[0];
 
 renderHome();
+refreshSelectsJoueurs();
 
 setTimeout(()=>{
   const splash=eid('splash');
