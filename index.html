@@ -108,17 +108,17 @@ body{background:#2e6b28;background-image:repeating-linear-gradient(45deg,rgba(0,
 .table-score{font-size:13px;font-weight:700;margin-top:6px;color:rgba(255,255,255,0.6);}
 
 /* ═══ CLASSEMENT ROW ═══ */
-.rank-row{display:flex;align-items:center;gap:10px;padding:10px 0;border-bottom:1px solid rgba(0,0,0,0.06);}
+.rank-row{display:flex;align-items:center;gap:12px;padding:14px 0;border-bottom:1px solid rgba(0,0,0,0.06);}
 .rank-row:last-child{border-bottom:none;}
-.rank-num{font-size:22px;font-weight:900;color:var(--text2);width:28px;text-align:center;}
+.rank-num{font-size:26px;font-weight:900;color:var(--text2);width:34px;text-align:center;}
 .rank-num.gold{color:var(--gold);}
 .rank-num.silver{color:#9e9e9e;}
 .rank-num.bronze{color:#a0522d;}
 .rank-info{flex:1;}
-.rank-name{font-size:15px;font-weight:800;color:var(--text);}
-.rank-players{font-size:12px;color:var(--text2);margin-top:1px;}
-.rank-pct{font-size:22px;font-weight:900;color:var(--green);}
-.rank-detail{font-size:11px;color:var(--text2);margin-top:1px;text-align:right;}
+.rank-name{font-size:18px;font-weight:800;color:var(--text);}
+.rank-players{font-size:15px;color:var(--text2);margin-top:3px;}
+.rank-pct{font-size:28px;font-weight:900;color:var(--green);}
+.rank-detail{font-size:13px;color:var(--text2);margin-top:2px;text-align:right;}
 
 /* ═══ MODAL ═══ */
 .modal-bg{position:fixed;inset:0;background:rgba(0,0,0,0.75);z-index:10000;display:flex;align-items:center;justify-content:center;padding:20px;}
@@ -798,11 +798,11 @@ function renderClassement(){
       <div class="rank-info">
         <div class="rank-name">${eq.nom}</div>
         <div class="rank-players" style="color:var(--text2);">${eq.j1} · ${eq.j2}</div>
-        <div style="font-size:11px;color:var(--text2);margin-top:2px;">${eq.nbVictoires}V ${eq.nbDefaites}D · ${eq.tours.length} partie${eq.tours.length>1?'s':''}</div>
+        <div style="font-size:15px;color:var(--text2);margin-top:3px;">${eq.nbVictoires}V ${eq.nbDefaites}D · ${eq.tours.length} partie${eq.tours.length>1?'s':''}</div>
       </div>
       <div style="text-align:right;">
         <div class="rank-pct" style="color:${pctColor};">${eq.nbVictoires}V</div>
-        <div style="font-size:11px;color:var(--text2);">diff: ${(eq.diffPoints||0)>0?'+':''}${eq.diffPoints||0}</div>
+        <div style="font-size:15px;color:var(--text2);margin-top:3px;">diff: ${(eq.diffPoints||0)>0?'+':''}${eq.diffPoints||0}</div>
       </div>
     </div>`;
   });
