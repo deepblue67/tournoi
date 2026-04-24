@@ -179,7 +179,7 @@ body{background:#2e6b28;background-image:repeating-linear-gradient(45deg,rgba(0,
   <!-- HEADER -->
   <div class="header">
     <h1 id="hdr-title">Tournoi Belote Contrée</h1>
-    <div class="sub" id="hdr-sub">Organisateur</div>
+    <div class="sub" id="hdr-sub">Organisateur &nbsp;<span style="font-size:10px;opacity:0.5;font-weight:400;">v20250424_2145</span></div>
   </div>
 
   <!-- ══ ÉCRAN ACCUEIL ══ -->
@@ -353,7 +353,7 @@ function updateHeader(){
     eid('hdr-sub').textContent=`Tour ${T.tourEnCours} / ${T.nbTours} · ${T.equipes.length} équipes`;
   } else {
     eid('hdr-title').textContent='Tournoi Belote Contrée';
-    eid('hdr-sub').textContent='Organisateur';
+    eid('hdr-sub').innerHTML='Organisateur &nbsp;<span style="font-size:10px;opacity:0.5;font-weight:400;">v20250424_2145</span>';
   }
 }
 
@@ -793,16 +793,17 @@ function renderClassement(){
     const medal=i===0?'🥇':i===1?'🥈':i===2?'🥉':'';
     const rankClass=i===0?'gold':i===1?'silver':i===2?'bronze':'';
     const pctColor=eq.nbVictoires>eq.nbDefaites?'var(--green)':eq.nbVictoires===eq.nbDefaites?'var(--gold)':'var(--red)';
+    const diff=(eq.diffPoints||0);
+    const diffColor=diff>0?'var(--green)':diff<0?'var(--red)':'var(--text2)';
     html+=`<div class="rank-row">
       <div class="rank-num ${rankClass}">${medal||i+1}</div>
       <div class="rank-info">
         <div class="rank-name">${eq.nom}</div>
-        <div class="rank-players" style="color:var(--text2);">${eq.j1} · ${eq.j2}</div>
         <div style="font-size:15px;color:var(--text2);margin-top:3px;">${eq.nbVictoires}V ${eq.nbDefaites}D · ${eq.tours.length} partie${eq.tours.length>1?'s':''}</div>
       </div>
       <div style="text-align:right;">
         <div class="rank-pct" style="color:${pctColor};">${eq.nbVictoires}V</div>
-        <div style="font-size:15px;color:var(--text2);margin-top:3px;">diff: ${(eq.diffPoints||0)>0?'+':''}${eq.diffPoints||0}</div>
+        <div class="rank-pct" style="color:${diffColor};margin-top:4px;">${diff>0?'+':''}${diff}</div>
       </div>
     </div>`;
   });
